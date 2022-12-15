@@ -1,3 +1,7 @@
+"""
+Changes that have been made:
+- Refactor script name (from save_on_best_result_v3.py)
+"""
 import os
 import numpy as np
 from stable_baselines3.common.callbacks import BaseCallback

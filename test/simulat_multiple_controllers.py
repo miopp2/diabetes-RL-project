@@ -7,6 +7,8 @@ from warnings import simplefilter
 simplefilter(action='ignore', category=FutureWarning)
 simplefilter(action='ignore', category=UserWarning)
 
+from test.analysis.report import report
+# from simglucose.analysis.report import report
 from simglucose.simulation.env import T1DSimEnv
 from simglucose.controller.pid_ctrller import PIDController
 from simglucose.controller.basal_bolus_ctrller import BBController
@@ -16,7 +18,6 @@ from simglucose.patient.t1dpatient import T1DPatient
 from simglucose.simulation.scenario import CustomScenario
 from simglucose.simulation.sim_engine import SimObj, batch_sim
 from datetime import timedelta
-from simglucose.analysis.report import report
 from datetime import datetime
 import pkg_resources
 import numpy as np
@@ -118,16 +119,15 @@ if __name__ == '__main__':
     latest_saved_model = './models/best_model_many_vals.zip'
 
     # select controller to run simulation with
-    # controller_names = ['BBController', 'PIDCtrller_0.0001_0.00000275_0.1', 'PPO']
-    controllers = [BBController(), PIDController(P=-0.0001, I=-0.000000275, D=-0.1),
-                   PPOController(0, latest_saved_model)]
-    #controllers = [PPOController(0, latest_saved_model)]
+    # controllers = [BBController(), PIDController(P=-0.0001, I=-0.000000275, D=-0.1),
+    #                PPOController(0, latest_saved_model)]
+    controllers = [PIDController(P=-0.0001, I=-0.000000275, D=-0.1)]
 
     # Select parameters to run simulation for
     patient_group = 'All'
-    sim_days = 1
-    patient_names = select_patients(patient_group)
-    # patient_names = ['adolescent#001', 'adult#001']
+    sim_days = 3
+    # patient_names = select_patients(patient_group)
+    patient_names = ['adolescent#001', 'adult#001', 'child#007']
 
     # set base scenario and add variability
     base_scen = [(1, 70), (12, 70), (18, 70), (23, 70)]
@@ -162,4 +162,4 @@ if __name__ == '__main__':
             results = batch_sim(sim_instances, parallel=True)
 
         df = pd.concat(results, keys=[s.env.patient.name for s in sim_instances])
-        results, ri_per_hour, zone_stats, figs, axes = report(df, path_ctrl)
+        results, ri_per_hour, figs, axes = report(df, path_ctrl)

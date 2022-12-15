@@ -1,0 +1,4 @@
+.idea
+results
+*tensorboard
+*training_ws
