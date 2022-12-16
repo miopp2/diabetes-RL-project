@@ -432,7 +432,6 @@ class T1DAdolescentSimEnv(gym.Env):
         # have to hard code the patient_name, gym has some interesting
         # error when choosing the patient
         if patient_name is None:
-            # todo: maybe change what patients we run
             # patient_name = 'adolescent#001'
             adolescent_patients = [p for p in patient_names if "adolescent" in p]
             patient_name = random.choice(adolescent_patients)
@@ -509,7 +508,6 @@ class T1DChildSimEnv(gym.Env):
         # have to hard code the patient_name, gym has some interesting
         # error when choosing the patient
         if patient_name is None:
-            # todo: maybe change what patients we run
             # patient_name = 'adolescent#001'
             child_patients = [p for p in patient_names if "child" in p]
             patient_name = random.choice(child_patients)

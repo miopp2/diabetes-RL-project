@@ -11,6 +11,7 @@ class PPOController(Controller):
         self.padded_obs = np.zeros((padding, 1))
 
     def policy(self, observation, reward, done, **info):
+        __module__ = None
         self.padded_obs[0] = observation[0]
         self.state = observation
         action, _ = self.model.predict(self.padded_obs, deterministic=True)

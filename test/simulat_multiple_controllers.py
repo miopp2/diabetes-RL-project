@@ -56,22 +56,23 @@ def build_envs(name, _scenario):
     return env
 
 
-def create_scenario(_base_scen, _sim_days):
+def create_scenario(_base_scen, _sim_days, vary=True):
     repeat_scen = []
     vary_scen = []
     for simDay in range(_sim_days):
         for time, mealsize in _base_scen:
             repeat_scen.append((24 * simDay + time, mealsize))
-
-    for meal, vals in enumerate(repeat_scen):
-        time, CHO = vals
-        time += np.random.normal(0.0, 0.25)
-        if not (meal - 3) % 4 == 0:
-            CHO += np.random.normal(0.0, 10)
-        else:
-            CHO += np.random.normal(0.0, 5)
-        vary_scen.append((float(f'{time:.2f}'), float(f'{CHO:.2f}')))
-    return CustomScenario(start_time=start_time, scenario=vary_scen), vary_scen
+    if vary == True:
+        for meal, vals in enumerate(repeat_scen):
+            time, CHO = vals
+            time += np.random.normal(0.0, 0.25)
+            if not (meal - 3) % 4 == 0:
+                CHO += np.random.normal(0.0, 10)
+            else:
+                CHO += np.random.normal(0.0, 5)
+            vary_scen.append((float(f'{time:.2f}'), float(f'{CHO:.2f}')))
+        return CustomScenario(start_time=start_time, scenario=vary_scen), vary_scen
+    return CustomScenario(start_time=start_time, scenario=repeat_scen), repeat_scen
 
 
 def write_log(_envs, _patient_names, _base_scen, _mod_scen, _controllers, save_path, model):
@@ -116,22 +117,22 @@ def create_ctrllers(_ctrllers):
 
 if __name__ == '__main__':
     path = create_result_folder()
-    latest_saved_model = './models/best_model_many_vals.zip'
+    latest_saved_model = './models/best_model_T1DDiscreteSimEnv.zip'
 
     # select controller to run simulation with
     # controllers = [BBController(), PIDController(P=-0.0001, I=-0.000000275, D=-0.1),
     #                PPOController(0, latest_saved_model)]
-    controllers = [PIDController(P=-0.0001, I=-0.000000275, D=-0.1)]
+    controllers = [PPOController(0, latest_saved_model)]
 
     # Select parameters to run simulation for
     patient_group = 'All'
-    sim_days = 3
+    sim_days = 7
     # patient_names = select_patients(patient_group)
     patient_names = ['adolescent#001', 'adult#001', 'child#007']
 
-    # set base scenario and add variability
-    base_scen = [(1, 70), (12, 70), (18, 70), (23, 70)]
-    scenario, mod_scen = create_scenario(base_scen, sim_days)
+    # set base scenario and add variability and repeat for as many days as necessary
+    base_scen = [(7, 70), (10, 30), (14, 110), (9, 90)]
+    scenario, mod_scen = create_scenario(base_scen, sim_days, vary=False)
 
     for num, controller in enumerate(controllers):
         folder_name = controller.__class__.__name__
