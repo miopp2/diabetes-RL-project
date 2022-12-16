@@ -13,10 +13,13 @@ logger = logging.getLogger(__name__)
 
 def ensemble_BG_24h(BG, sim_days, ax=None, plot_var=False, nstd=3):
     dailyBG = BG.iloc[0:480, :]
+    dailyBG.reset_index(drop=True, inplace=True)
     for day in range(1, sim_days):
         start_idx = day * 480
         end_idx = start_idx + 480
-        dailyBG = pd.concat([dailyBG, dailyBG.iloc[start_idx:end_idx, :]])
+        next_day = BG.iloc[start_idx:end_idx, :]
+        next_day.reset_index(drop=True, inplace=True)
+        dailyBG = pd.concat([dailyBG, next_day], axis=1)
 
     mean_curve = dailyBG.transpose().mean()
     std_curve = dailyBG.transpose().std()
@@ -24,7 +27,7 @@ def ensemble_BG_24h(BG, sim_days, ax=None, plot_var=False, nstd=3):
     down_env = mean_curve - nstd * std_curve
 
     # t = BG.index.to_pydatetime()
-    t = pd.to_datetime(dailyBG.index)
+    t = pd.to_datetime(BG.index[:480])
     if ax is None:
         fig, ax = plt.subplots(1)
     if plot_var and not std_curve.isnull().all():
@@ -88,7 +91,7 @@ def ensemblePlot(df):
     df_BG = df.unstack(level=0).BG
     df_CGM = df.unstack(level=0).CGM
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure()
+    fig = plt.figure(layout='constrained')
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
@@ -114,7 +117,7 @@ def ensemblePlot_24h(df, sim_days):
     df_BG = df.unstack(level=0).BG
     df_CGM = df.unstack(level=0).CGM
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure()
+    fig = plt.figure(layout='constrained')
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
@@ -126,11 +129,11 @@ def ensemblePlot_24h(df, sim_days):
 
     ax1.tick_params(labelbottom=False)
     ax2.tick_params(labelbottom=False)
-    # ax3.xaxis.set_minor_locator(mdates.AutoDateLocator())
-    # ax3.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
-    # ax3.xaxis.set_major_locator(mdates.DayLocator())
-    # ax3.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
-    ax3.set_xlim([t[0], t[-1]])
+    ax3.xaxis.set_minor_locator(mdates.AutoDateLocator())
+    ax3.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
+    ax3.xaxis.set_major_locator(mdates.DayLocator())
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter(''))
+    ax3.set_xlim([t[0], t[480]])
     ax1.set_ylabel('Blood Glucose (mg/dl)')
     ax2.set_ylabel('CGM (mg/dl)')
     ax3.set_ylabel('CHO (g)')
