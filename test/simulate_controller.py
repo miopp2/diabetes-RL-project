@@ -22,7 +22,7 @@ from test.controller import PPOController
 from train.env.simglucose_gym_env import T1DAdultSimEnv
 from train.reward.custom_rewards import partial_negativity
 
-latest_saved_model = './models/best_model_disc_many_vals.zip'
+latest_saved_model = './models/best_model_T1DDiscreteSimEnv.zip'
 
 controller = PPOController(0, latest_saved_model)
 
