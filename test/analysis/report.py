@@ -1,9 +1,21 @@
+"""
+Changes that have been made:
+- added "ensemble_BG_24h": ensemble of BG of all patients for plot (24h)
+- changes "ensemble_BG": adjustments to x-ticks
+- added "ensemble_insulin_24h": ensemble of insulin of all patients for plot (24h)
+- added "ensemble_insulin": ensemble of insulin of all patients for plot (24h)
+- changes "ensemblePlot": CGM removed and insulin added as subplot
+- changes "percent_stats": time in range changed to BG ranges (xx<BG<xx)
+"""
+
+
 import glob
 import pandas as pd
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from datetime import timedelta
 from matplotlib.collections import PatchCollection
 # from pandas.plotting import lag_plot
 import logging
@@ -61,6 +73,11 @@ def ensemble_BG(BG, ax=None, plot_var=False, nstd=3):
 
     # t = BG.index.to_pydatetime()
     t = pd.to_datetime(BG.index)
+
+    # calculation of simulation days
+    td = t[-1] - t[0]
+    sim_days = td.days
+
     if ax is None:
         fig, ax = plt.subplots(1)
     if plot_var and not std_curve.isnull().all():
@@ -70,13 +87,20 @@ def ensemble_BG(BG, ax=None, plot_var=False, nstd=3):
         ax.plot_date(
             t, BG[p], '-', color='grey', alpha=0.5, lw=0.5, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
-    ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
+    #ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
 
     ax.axhline(70, c='green', linestyle='--', label='Hypoglycemia', lw=1)
     ax.axhline(180, c='red', linestyle='--', label='Hyperglycemia', lw=1)
+
+    # adding vertical line after each day
+    start_time = t[0]
+    hours_day = 24
+    for day in range(sim_days):
+        ax.axvline([start_time + timedelta(hours=day * hours_day)], c='grey', linestyle='--', lw=1)
+
 
     ax.set_xlim([t[0], t[-1]])
     ax.set_ylim([BG.min().min() - 10, BG.max().max() + 10])
@@ -86,43 +110,124 @@ def ensemble_BG(BG, ax=None, plot_var=False, nstd=3):
     return ax
 
 
+def ensemble_insulin_24h(Insulin, sim_days, ax=None, plot_var=False, nstd=3):
+    dailyInsulin = Insulin.iloc[0:480, :]
+    dailyInsulin.reset_index(drop=True, inplace=True)
+    for day in range(1, sim_days):
+        start_idx = day * 480
+        end_idx = start_idx + 480
+        next_day = Insulin.iloc[start_idx:end_idx, :]
+        next_day.reset_index(drop=True, inplace=True)
+        dailyInsulin = pd.concat([dailyInsulin, next_day], axis=1)
+
+    mean_curve = dailyInsulin.transpose().mean()
+    std_curve = dailyInsulin.transpose().std()
+    up_env = mean_curve + nstd * std_curve
+    down_env = mean_curve - nstd * std_curve
+
+    # t = Insulin.index.to_pydatetime()
+    t = pd.to_datetime(Insulin.index[:480])
+    if ax is None:
+        fig, ax = plt.subplots(1)
+    if plot_var and not std_curve.isnull().all():
+        ax.fill_between(
+            t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
+    for p in dailyInsulin:
+        ax.plot_date(
+            t, dailyInsulin[p], '-', color='grey', alpha=0.5, lw=0.5, label='_nolegend_')
+    ax.plot(t, mean_curve, lw=2, label='Mean Curve')
+    ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
+    ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
+
+    ax.set_xlim([t[0], t[-1]])
+    ax.set_ylim([dailyInsulin.min().min() - 0.5, dailyInsulin.max().max() + 0.5])
+    ax.legend()
+    ax.set_ylabel('Insulin (xxxxxxxxx)') #todo
+    #     fig.autofmt_xdate()
+    return ax
+
+
+def ensemble_insulin(insulin, ax=None, plot_var=False, nstd=3):
+    mean_curve = insulin.transpose().mean()
+    std_curve = insulin.transpose().std()
+    up_env = mean_curve + nstd * std_curve
+    down_env = mean_curve - nstd * std_curve
+
+    # t = insulin.index.to_pydatetime()
+    t = pd.to_datetime(insulin.index)
+
+    # calculation of simulation days
+    td = t[-1] - t[0]
+    sim_days = td.days
+
+    if ax is None:
+        fig, ax = plt.subplots(1)
+    if plot_var and not std_curve.isnull().all():
+        ax.fill_between(
+            t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
+    for p in insulin:
+        ax.plot_date(
+            t, insulin[p], '-', color='grey', alpha=0.5, lw=0.5, label='_nolegend_')
+    ax.plot(t, mean_curve, lw=2, label='Mean Curve')
+    #ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
+    ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
+
+    # adding vertical line after each day
+    start_time = t[0]
+    hours_day = 24
+    for day in range(sim_days):
+        ax.axvline([start_time + timedelta(hours=day * hours_day)], c='grey', linestyle='--', lw=1)
+
+
+    ax.set_xlim([t[0], t[-1]])
+    ax.set_ylim([insulin.min().min() - 0.5, insulin.max().max() + 0.5])
+    ax.legend()
+    ax.set_ylabel('Insulin (xxxxxxxxx)') #todo
+    #     fig.autofmt_xdate()
+    return ax
+
 
 def ensemblePlot(df):
     df_BG = df.unstack(level=0).BG
-    df_CGM = df.unstack(level=0).CGM
+    df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(layout='constrained')
+    fig = plt.figure(figsize=(8, 6), dpi=180, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
     ax1 = ensemble_BG(df_BG, ax=ax1, plot_var=True, nstd=1)
-    ax2 = ensemble_BG(df_CGM, ax=ax2, plot_var=True, nstd=1)
+    ax2 = ensemble_insulin(df_insulin, ax=ax2, plot_var=True, nstd=1)
     # t = df_CHO.index.to_pydatetime()
     t = pd.to_datetime(df_CHO.index)
     ax3.plot(t, df_CHO)
 
-    ax1.tick_params(labelbottom=False)
-    ax2.tick_params(labelbottom=False)
+    ax1.tick_params(labelbottom=False)  # add/remove current day as tic
+    ax2.tick_params(labelbottom=False)  # add/remove current day as tic
     ax3.xaxis.set_minor_locator(mdates.AutoDateLocator())
     ax3.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
     ax3.xaxis.set_major_locator(mdates.DayLocator())
     ax3.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
     ax3.set_xlim([t[0], t[-1]])
     ax1.set_ylabel('Blood Glucose (mg/dl)')
-    ax2.set_ylabel('CGM (mg/dl)')
+    ax2.set_ylabel('Insulin (xxxxxxxxx)') #todo
     ax3.set_ylabel('CHO (g)')
     return fig, ax1, ax2, ax3
 
+
 def ensemblePlot_24h(df, sim_days):
     df_BG = df.unstack(level=0).BG
-    df_CGM = df.unstack(level=0).CGM
+    df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(layout='constrained')
+    fig = plt.figure(figsize=(8, 6), dpi=180, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
     ax1 = ensemble_BG_24h(df_BG, sim_days=sim_days, ax=ax1, plot_var=True, nstd=1)
-    ax2 = ensemble_BG_24h(df_CGM, sim_days=sim_days, ax=ax2, plot_var=True, nstd=1)
+    ax2 = ensemble_insulin_24h(df_insulin, sim_days=sim_days, ax=ax2, plot_var=True, nstd=1)
     # t = df_CHO.index.to_pydatetime()
     t = pd.to_datetime(df_CHO.index)
     ax3.plot(t, df_CHO)
@@ -135,7 +240,7 @@ def ensemblePlot_24h(df, sim_days):
     ax3.xaxis.set_major_formatter(mdates.DateFormatter(''))
     ax3.set_xlim([t[0], t[480]])
     ax1.set_ylabel('Blood Glucose (mg/dl)')
-    ax2.set_ylabel('CGM (mg/dl)')
+    ax2.set_ylabel('Insulin (xxxxxxxxx)') #todo
     ax3.set_ylabel('CHO (g)')
     return fig, ax1, ax2, ax3
 
@@ -335,7 +440,7 @@ def report(df, save_path=None, sim_days=1):
         # zone_stats.to_csv(os.path.join(save_path, 'CVGA_stats.csv'))
 
         fig_ensemble.savefig(os.path.join(save_path, 'BG_trace.png'))
-        fig_ensemble24.savefig(os.path.join(save_path, 'BG_trace_24n.png'))
+        fig_ensemble24.savefig(os.path.join(save_path, 'BG_trace_24h.png'))
         fig_percent.savefig(os.path.join(save_path, 'zone_stats.png'))
         fig_ri.savefig(os.path.join(save_path, 'risk_stats.png'))
         # fig_cvga.savefig(os.path.join(save_path, 'CVGA.png'))
@@ -363,8 +468,8 @@ if __name__ == '__main__':
     # logger.addHandler(fh)
     logger.addHandler(ch)
     # For test only
-    path = os.path.join('..', '..', 'examples', 'results',
-                        '2017-12-31_17-46-32')
+    path = os.path.join('..', 'results', 'test',
+                        '2022-12-16_14-51-12', 'BBController')
     os.chdir(path)
     filename = glob.glob('*#*.csv')
     name = [_f[:-4] for _f in filename]
@@ -372,7 +477,7 @@ if __name__ == '__main__':
     # df_BG = df.unstack(level=0).BG
     # df_CGM = df.unstack(level=0).CGM
     # report(df_BG, df_CGM)
-    results, ri_per_hour, zone_stats, axes = report(df)
+    results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController')
     # print results
     # # print ri_per_hour
     # print zone_stats
