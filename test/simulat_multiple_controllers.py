@@ -120,19 +120,18 @@ if __name__ == '__main__':
     latest_saved_model = './models/best_model_T1DDiscreteSimEnv.zip'
 
     # select controller to run simulation with
-    # controllers = [BBController(), PIDController(P=-0.0001, I=-0.000000275, D=-0.1),
-    #                PPOController(0, latest_saved_model)]
-    controllers = [PPOController(0, latest_saved_model)]
+    controllers = [BBController(), PIDController(P=-0.0001, I=-0.000000275, D=-0.1), PPOController(0, latest_saved_model)]
+    # controllers = [PPOController(0, latest_saved_model)]
 
     # Select parameters to run simulation for
     patient_group = 'All'
     sim_days = 7
-    # patient_names = select_patients(patient_group)
-    patient_names = ['adolescent#001', 'adult#001', 'child#007']
+    patient_names = select_patients(patient_group)
+    # patient_names = ['adolescent#001', 'adult#001', 'child#007']
 
     # set base scenario and add variability and repeat for as many days as necessary
-    base_scen = [(7, 70), (10, 30), (14, 110), (9, 90)]
-    scenario, mod_scen = create_scenario(base_scen, sim_days, vary=False)
+    base_scen = [(7, 70), (10, 30), (14, 110), (21, 90)]
+    scenario, mod_scen = create_scenario(base_scen, sim_days, vary=True)
 
     for num, controller in enumerate(controllers):
         folder_name = controller.__class__.__name__
