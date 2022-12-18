@@ -4,6 +4,7 @@ Changes that have been made:
 - changes "ensemble_BG": adjustments to x-ticks
 - added "ensemble_insulin_24h": ensemble of insulin of all patients for plot (24h)
 - added "ensemble_insulin": ensemble of insulin of all patients for plot (24h)
+- added "ensemble_CHO_24h": ensamble of CHO of all patients for plot (24h)
 - changes "ensemblePlot": CGM removed and insulin added as subplot
 - changes "percent_stats": time in range changed to BG ranges (xx<BG<xx)
 """
@@ -47,7 +48,7 @@ def ensemble_BG_24h(BG, sim_days, ax=None, plot_var=False, nstd=3):
             t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
     for p in dailyBG:
         ax.plot_date(
-            t, dailyBG[p], '-', color='grey', alpha=0.2, lw=0.5, label='_nolegend_')
+            t, dailyBG[p], '-', color='grey', alpha=0.2, lw=0.1, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
     ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
@@ -133,7 +134,7 @@ def ensemble_insulin_24h(Insulin, sim_days, ax=None, plot_var=False, nstd=3):
             t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
     for p in dailyInsulin:
         ax.plot_date(
-            t, dailyInsulin[p], '-', color='grey', alpha=0.2, lw=0.5, label='_nolegend_')
+            t, dailyInsulin[p], '-', color='grey', alpha=0.2, lw=0.1, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
     ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
@@ -213,7 +214,7 @@ def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
             t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
     for p in dailyCHO:
         ax.plot_date(
-            t, dailyCHO[p], '-', color='grey', alpha=0.2, lw=0.5, label='_nolegend_')
+            t, dailyCHO[p], '-', color='grey', alpha=0.2, lw=0.1, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
     ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
@@ -506,15 +507,15 @@ if __name__ == '__main__':
     # logger.addHandler(fh)
     logger.addHandler(ch)
     # For test only
-    path = os.path.join('..', 'results', 'test',
-                        '2022-12-16_14-51-12', 'BBController')
+    path = os.path.join('..', 'results', '2022-12-17_10-13-30', 'BBController')
     os.chdir(path)
     filename = glob.glob('*#*.csv')
     name = [_f[:-4] for _f in filename]
     df = pd.concat([pd.read_csv(f, index_col=0) for f in filename], keys=name)
-    # df_BG = df.unstack(level=0).BG
-    # df_CGM = df.unstack(level=0).CGM
-    # report(df_BG, df_CGM)
+    sim_days = 1
+    # sim_days = int(len(df) / len(filename) / 480) # overlays multiple days on one day
+    if df['insulin'].dtypes == 'object':
+        df['insulin'] = df['insulin'].str.replace(r'[\[\]]', '', regex=True).astype(float)
     results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController')
     # print results
     # # print ri_per_hour
