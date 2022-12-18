@@ -1,9 +1,13 @@
 import os
 import glob
 import pandas as pd
+import matplotlib.pyplot as plt
 from test.analysis.report import report
 
-folder_to_analyse = "2022-12-08_08-55-17"
+folder_to_analyse = "2022-12-17_10-13-30"
+
+prop_cycle = plt.rcParams['axes.prop_cycle']
+colors = prop_cycle.by_key()['color']
 
 # groups = ["/adolescent*.csv", "/adult*.csv", "/child*.csv"]
 groups = ["/adolescent*.csv"]
