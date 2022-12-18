@@ -71,7 +71,7 @@ def create_scenario(_base_scen, _sim_days, vary=True):
         for meal, vals in enumerate(repeat_scen):
             time, CHO = vals
             time += np.random.normal(0.0, 0.25)
-            if not (meal - 3) % 4 == 0:
+            if (meal - 1) % 4:
                 CHO += np.random.normal(0.0, 10)
             else:
                 CHO += np.random.normal(0.0, 5)
