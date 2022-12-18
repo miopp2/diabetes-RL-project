@@ -4,7 +4,7 @@ Changes that have been made:
 - changes "ensemble_BG": adjustments to x-ticks
 - added "ensemble_insulin_24h": ensemble of insulin of all patients for plot (24h)
 - added "ensemble_insulin": ensemble of insulin of all patients for plot (24h)
-- added "ensemble_CHO_24h": ensamble of CHO of all patients for plot (24h)
+- added "ensemble_CHO_24h": ensemble of CHO of all patients for plot (24h)
 - changes "ensemblePlot": CGM removed and insulin added as subplot
 - changes "percent_stats": time in range changed to BG ranges (xx<BG<xx)
 """
@@ -232,7 +232,7 @@ def ensemblePlot(df):
     df_BG = df.unstack(level=0).BG
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(figsize=(8, 6), dpi=300, layout='constrained')  # figure size and image quality
+    fig = plt.figure(figsize=(8, 6), dpi=600, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
@@ -260,7 +260,7 @@ def ensemblePlot_24h(df, sim_days):
     df_BG = df.unstack(level=0).BG
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(figsize=(8, 6), dpi=300, layout='constrained')  # figure size and image quality
+    fig = plt.figure(figsize=(8, 6), dpi=600, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
@@ -512,11 +512,11 @@ if __name__ == '__main__':
     filename = glob.glob('*#*.csv')
     name = [_f[:-4] for _f in filename]
     df = pd.concat([pd.read_csv(f, index_col=0) for f in filename], keys=name)
-    sim_days = 1
-    # sim_days = int(len(df) / len(filename) / 480) # overlays multiple days on one day
+    # sim_days = 1
+    sim_days = int(len(df) / len(filename) / 480) # overlays multiple days on one day
     if df['insulin'].dtypes == 'object':
         df['insulin'] = df['insulin'].str.replace(r'[\[\]]', '', regex=True).astype(float)
-    results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController')
+    results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController', sim_days=sim_days)
     # print results
     # # print ri_per_hour
     # print zone_stats
