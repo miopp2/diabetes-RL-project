@@ -4,8 +4,10 @@ Changes that have been made:
 - changes "ensemble_BG": adjustments to x-ticks
 - added "ensemble_insulin_24h": ensemble of insulin of all patients for plot (24h)
 - added "ensemble_insulin": ensemble of insulin of all patients for plot (24h)
-- changes "ensemblePlot": CGM removed and insulin added as subplot
+- added "ensemble_CHO_24h": ensemble of CHO of all patients for plot (24h)
+- changes "ensemblePlot":  insulin added as subplot
 - changes "percent_stats": time in range changed to BG ranges (xx<BG<xx)
+- changes: unused imports and variables removed
 """
 
 import glob
@@ -18,6 +20,7 @@ from datetime import timedelta
 from matplotlib.collections import PatchCollection
 # from pandas.plotting import lag_plot
 import logging
+
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 logger = logging.getLogger(__name__)
@@ -38,7 +41,6 @@ def ensemble_BG_24h(BG, sim_days, ax=None, plot_var=False, nstd=3):
     up_env = mean_curve + nstd * std_curve
     down_env = mean_curve - nstd * std_curve
 
-    # t = BG.index.to_pydatetime()
     t = pd.to_datetime(BG.index[:480])
     if ax is None:
         fig, ax = plt.subplots(1)
@@ -47,7 +49,7 @@ def ensemble_BG_24h(BG, sim_days, ax=None, plot_var=False, nstd=3):
             t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
     for p in dailyBG:
         ax.plot_date(
-            t, dailyBG[p], '-', color='grey', alpha=0.2, lw=0.5, label='_nolegend_')
+            t, dailyBG[p], '-', color='grey', alpha=0.2, lw=0.1, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
     ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
@@ -59,9 +61,7 @@ def ensemble_BG_24h(BG, sim_days, ax=None, plot_var=False, nstd=3):
 
     ax.set_xlim([t[0], t[-1]])
     ax.set_ylim([dailyBG.min().min() - 10, dailyBG.max().max() + 10])
-    # ax.legend()
     ax.set_ylabel('Blood Glucose (mg/dl)')
-    #     fig.autofmt_xdate()
     return ax
 
 
@@ -71,9 +71,7 @@ def ensemble_BG(BG, ax=None, plot_var=False, nstd=3):
     up_env = mean_curve + nstd * std_curve
     down_env = mean_curve - nstd * std_curve
 
-    # t = BG.index.to_pydatetime()
     t = pd.to_datetime(BG.index)
-
     # calculation of simulation days
     td = t[-1] - t[0]
     sim_days = td.days
@@ -103,9 +101,7 @@ def ensemble_BG(BG, ax=None, plot_var=False, nstd=3):
 
     ax.set_xlim([t[0], t[-1]])
     ax.set_ylim([BG.min().min() - 10, BG.max().max() + 10])
-    # ax.legend()
     ax.set_ylabel('Blood Glucose (mg/dl)')
-    #     fig.autofmt_xdate()
     return ax
 
 
@@ -124,7 +120,6 @@ def ensemble_insulin_24h(Insulin, sim_days, ax=None, plot_var=False, nstd=3):
     up_env = mean_curve + nstd * std_curve
     down_env = mean_curve - nstd * std_curve
 
-    # t = Insulin.index.to_pydatetime()
     t = pd.to_datetime(Insulin.index[:480])
     if ax is None:
         fig, ax = plt.subplots(1)
@@ -133,7 +128,7 @@ def ensemble_insulin_24h(Insulin, sim_days, ax=None, plot_var=False, nstd=3):
             t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
     for p in dailyInsulin:
         ax.plot_date(
-            t, dailyInsulin[p], '-', color='grey', alpha=0.2, lw=0.5, label='_nolegend_')
+            t, dailyInsulin[p], '-', color='grey', alpha=0.2, lw=0.1, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
     ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
@@ -142,9 +137,7 @@ def ensemble_insulin_24h(Insulin, sim_days, ax=None, plot_var=False, nstd=3):
 
     ax.set_xlim([t[0], t[-1]])
     ax.set_ylim([dailyInsulin.min().min() - 0.1, dailyInsulin.max().max() + 0.1])
-    # ax.legend()
     ax.set_ylabel('Insulin (U/min)')
-    #     fig.autofmt_xdate()
     return ax
 
 
@@ -155,9 +148,7 @@ def ensemble_insulin(insulin, ax=None, plot_var=False, nstd=3):
     down_env = mean_curve - nstd * std_curve
     down_env[down_env < 0] = 0
 
-    # t = insulin.index.to_pydatetime()
     t = pd.to_datetime(insulin.index)
-
     # calculation of simulation days
     td = t[-1] - t[0]
     sim_days = td.days
@@ -184,10 +175,9 @@ def ensemble_insulin(insulin, ax=None, plot_var=False, nstd=3):
 
     ax.set_xlim([t[0], t[-1]])
     ax.set_ylim([insulin.min().min() - 0.1, insulin.max().max() + 0.1])
-    # ax.legend()
     ax.set_ylabel('Insulin (U/min)')
-    #     fig.autofmt_xdate()
     return ax
+
 
 def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
     dailyCHO = CHO.iloc[0:480, :]
@@ -204,7 +194,6 @@ def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
     up_env = mean_curve + nstd * std_curve
     down_env = mean_curve - nstd * std_curve
 
-    # t = CHO.index.to_pydatetime()
     t = pd.to_datetime(CHO.index[:480])
     if ax is None:
         fig, ax = plt.subplots(1)
@@ -213,7 +202,7 @@ def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
             t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
     for p in dailyCHO:
         ax.plot_date(
-            t, dailyCHO[p], '-', color='grey', alpha=0.2, lw=0.5, label='_nolegend_')
+            t, dailyCHO[p], '-', color='grey', alpha=0.2, lw=0.1, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
     ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
@@ -222,22 +211,20 @@ def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
 
     ax.set_xlim([t[0], t[-1]])
     ax.set_ylim([dailyCHO.min().min() - 0.1, dailyCHO.max().max() + 0.1])
-    # ax.legend()
     ax.set_ylabel('CHO (U/min)')
-    #     fig.autofmt_xdate()
     return ax
 
+
 def ensemblePlot(df):
-    df_BG = df.unstack(level=0).BG
+    df_CGM = df.unstack(level=0).CGM
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(figsize=(8, 6), dpi=300, layout='constrained')  # figure size and image quality
+    fig = plt.figure(figsize=(8, 6), dpi=600, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
-    ax1 = ensemble_BG(df_BG, ax=ax1, plot_var=True, nstd=1)
+    ax1 = ensemble_BG(df_CGM, ax=ax1, plot_var=True, nstd=1)
     ax2 = ensemble_insulin(df_insulin, ax=ax2, plot_var=True, nstd=1)
-    # t = df_CHO.index.to_pydatetime()
     t = pd.to_datetime(df_CHO.index)
     ax3.plot(t, df_CHO, '#1f77b4')
 
@@ -256,17 +243,16 @@ def ensemblePlot(df):
 
 
 def ensemblePlot_24h(df, sim_days):
-    df_BG = df.unstack(level=0).BG
+    df_CGM = df.unstack(level=0).CGM
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(figsize=(8, 6), dpi=300, layout='constrained')  # figure size and image quality
+    fig = plt.figure(figsize=(8, 6), dpi=600, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
-    ax1 = ensemble_BG_24h(df_BG, sim_days=sim_days, ax=ax1, plot_var=True, nstd=1)
+    ax1 = ensemble_BG_24h(df_CGM, sim_days=sim_days, ax=ax1, plot_var=True, nstd=1)
     ax2 = ensemble_insulin_24h(df_insulin, sim_days=sim_days, ax=ax2, plot_var=True, nstd=1)
     ax3 = ensemble_CHO_24h(df_CHO, sim_days=sim_days, ax=ax3, plot_var=True, nstd=1)
-    # t = df_CHO.index.to_pydatetime()
     t = pd.to_datetime(df_CHO.index)
 
     ax1.tick_params(labelbottom=False)
@@ -279,13 +265,14 @@ def ensemblePlot_24h(df, sim_days):
     ax1.set_ylabel('Blood Glucose (mg/dl)')
     ax2.set_ylabel('Insulin (U/min)')
     ax3.set_ylabel('CHO (g)')
-    ax1.legend(loc='upper right', bbox_to_anchor=(1.3,1))
+    ax1.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     return fig, ax1, ax2, ax3
 
 
 def percent_stats(BG, ax=None):
+    fig = plt.figure(figsize=(8, 6), layout='constrained')  # figure size and image quality
     if ax is None:
-        fig, ax = plt.subplots(1)
+        ax = fig.add_subplot(111)
     # exclude BG > 50
     p_hyper = ((BG > 180) & (BG < 250)).sum() / len(BG) * 100
     p_hyper.name = '250<BG>180'
@@ -302,28 +289,23 @@ def percent_stats(BG, ax=None):
     # p_stats.plot(ax=ax, kind='bar')
     p_stats.plot.bar(ax=ax, stacked=True)
     ax.set_ylabel('Percent of time in Range (%)')
-    fig.tight_layout()
     #     p_stats.transpose().plot(kind='bar', legend=False)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     return p_stats, fig, ax
 
 
 def risk_index_trace(df_BG, visualize=False):
     chunk_BG = [df_BG.iloc[i:i + 60, :] for i in range(0, len(df_BG), 60)]
 
-    fBG = [
-        np.mean(1.509 * (np.log(BG[BG > 0]) ** 1.084 - 5.381)) for BG in chunk_BG
-    ]
-
+    fBG = [np.mean(1.509 * (np.log(BG[BG > 0]) ** 1.084 - 5.381)) for BG in chunk_BG]
     fBG_df = pd.concat(fBG, axis=1).transpose()
 
     LBGI = 10 * (fBG_df * (fBG_df < 0)) ** 2
     HBGI = 10 * (fBG_df * (fBG_df > 0)) ** 2
     RI = LBGI + HBGI
 
-    ri_per_hour = pd.concat(
-        [LBGI.transpose(), HBGI.transpose(),
-         RI.transpose()],
-        keys=['LBGI', 'HBGI', 'Risk Index'])
+    ri_per_hour = pd.concat([LBGI.transpose(), HBGI.transpose(), RI.transpose()],
+                            keys=['LBGI', 'HBGI', 'Risk Index'])
 
     axes = []
     if visualize:
@@ -340,11 +322,12 @@ def risk_index_trace(df_BG, visualize=False):
             plt.ylabel('Risk Index')
 
     ri_mean = ri_per_hour.transpose().mean().unstack(level=0)
-    fig, ax = plt.subplots(1)
+    fig = plt.figure(figsize=(8, 6), layout='constrained')  # figure size and image quality
+    ax = fig.add_subplot(111)
     ri_mean.plot(ax=ax, kind='bar')
-    fig.tight_layout()
 
     axes.append(ax)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     return ri_per_hour, ri_mean, fig, axes
 
 
@@ -453,8 +436,7 @@ def CVGA(BG_list, label=None):
         zone_stats.append((A, B, C, D, E))
 
     zone_stats = pd.DataFrame(zone_stats, columns=['A', 'B', 'C', 'D', 'E'])
-    #     ax.legend(bbox_to_anchor=(1, 1.10), borderaxespad=0.5)
-    ax.legend()
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     return zone_stats, fig, ax
 
 
@@ -506,16 +488,16 @@ if __name__ == '__main__':
     # logger.addHandler(fh)
     logger.addHandler(ch)
     # For test only
-    path = os.path.join('..', 'results', 'test',
-                        '2022-12-16_14-51-12', 'BBController')
+    path = os.path.join('..', 'results', '2022-12-17_14-58-23', 'BBController')
     os.chdir(path)
     filename = glob.glob('*#*.csv')
     name = [_f[:-4] for _f in filename]
     df = pd.concat([pd.read_csv(f, index_col=0) for f in filename], keys=name)
-    # df_BG = df.unstack(level=0).BG
-    # df_CGM = df.unstack(level=0).CGM
-    # report(df_BG, df_CGM)
-    results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController')
+    # sim_days = 1
+    sim_days = int(len(df) / len(filename) / 480)  # overlays multiple days on one day
+    if df['insulin'].dtypes == 'object':
+        df['insulin'] = df['insulin'].str.replace(r'[\[\]]', '', regex=True).astype(float)
+    results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController', sim_days=sim_days)
     # print results
-    # # print ri_per_hour
+    # print ri_per_hour
     # print zone_stats

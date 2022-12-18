@@ -7,6 +7,7 @@ import glob
 import os
 from datetime import datetime, timedelta
 from warnings import simplefilter
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 simplefilter(action='ignore', category=FutureWarning)
 simplefilter(action='ignore', category=UserWarning)
@@ -34,7 +35,7 @@ patient = T1DPatient.withName('adult#002')
 sensor = CGMSensor.withName('Dexcom', seed=1)
 pump = InsulinPump.withName('Insulet')
 
-scen = [(1, 70),  (12, 70), (18, 70), (23, 70)]
+scen = [(7, 70), (10, 30), (14, 110), (21, 90)]
 scenario = CustomScenario(start_time=start_time, scenario=scen)
 env = T1DSimEnv(patient, sensor, pump, scenario)
 
@@ -42,6 +43,6 @@ s1 = SimObj(env, controller, timedelta(days=1), animate=True, path=path)
 
 sim(s1)
 
-pid_controller = PIDController(P=0.001, I=0.00001, D=0.001)
+pid_controller = PIDController(P=-0.0001, I=-0.000000275, D=-0.1)
 s2 = SimObj(env, pid_controller, timedelta(days=1), animate=True, path=path)
 sim(s2)
