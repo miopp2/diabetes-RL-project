@@ -6,7 +6,7 @@ This project aims to compare different controllers for (autonomous) insulin infu
 
 To install the repository and all required packages (using pip): 
 ```bash
-git clone https://github.com/jxx123/simglucose.git
+git clone https://github.com/miopp2/diabetes-RL-project.git
 cd simglucose
 pip install -r requirements.txt
 ```
