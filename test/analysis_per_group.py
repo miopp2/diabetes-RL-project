@@ -1,13 +1,14 @@
+"""
+Changes that have been made:
+- our implementation
+"""
+
 import os
 import glob
 import pandas as pd
-import matplotlib.pyplot as plt
 from test.analysis.report import report
 
-folder_to_analyse = "2022-12-17_10-13-30"
-
-prop_cycle = plt.rcParams['axes.prop_cycle']
-colors = prop_cycle.by_key()['color']
+folder_to_analyse = "2022-12-17_14-58-23"
 
 groups = ["/adolescent*.csv", "/adult*.csv", "/child*.csv", "/*#*.csv"]
 # groups = ["/adolescent*.csv"]

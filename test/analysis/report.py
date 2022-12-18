@@ -20,6 +20,7 @@ from datetime import timedelta
 from matplotlib.collections import PatchCollection
 # from pandas.plotting import lag_plot
 import logging
+
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 logger = logging.getLogger(__name__)
@@ -177,6 +178,7 @@ def ensemble_insulin(insulin, ax=None, plot_var=False, nstd=3):
     ax.set_ylabel('Insulin (U/min)')
     return ax
 
+
 def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
     dailyCHO = CHO.iloc[0:480, :]
     dailyCHO.reset_index(drop=True, inplace=True)
@@ -211,6 +213,7 @@ def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
     ax.set_ylim([dailyCHO.min().min() - 0.1, dailyCHO.max().max() + 0.1])
     ax.set_ylabel('CHO (U/min)')
     return ax
+
 
 def ensemblePlot(df):
     df_CGM = df.unstack(level=0).CGM
@@ -302,7 +305,7 @@ def risk_index_trace(df_BG, visualize=False):
     RI = LBGI + HBGI
 
     ri_per_hour = pd.concat([LBGI.transpose(), HBGI.transpose(), RI.transpose()],
-        keys=['LBGI', 'HBGI', 'Risk Index'])
+                            keys=['LBGI', 'HBGI', 'Risk Index'])
 
     axes = []
     if visualize:
@@ -491,7 +494,7 @@ if __name__ == '__main__':
     name = [_f[:-4] for _f in filename]
     df = pd.concat([pd.read_csv(f, index_col=0) for f in filename], keys=name)
     # sim_days = 1
-    sim_days = int(len(df) / len(filename) / 480) # overlays multiple days on one day
+    sim_days = int(len(df) / len(filename) / 480)  # overlays multiple days on one day
     if df['insulin'].dtypes == 'object':
         df['insulin'] = df['insulin'].str.replace(r'[\[\]]', '', regex=True).astype(float)
     results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController', sim_days=sim_days)

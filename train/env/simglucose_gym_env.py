@@ -1,3 +1,9 @@
+"""
+Changes that have been made:
+- added: T1DAdolescentSimEnv, T1DChildSimEnv
+- changes: discrete parameters adjusted
+"""
+
 import random
 
 from simglucose.simulation.env import T1DSimEnv as _T1DSimEnv
@@ -673,7 +679,10 @@ class T1DDiscreteEnv(gym.Env):
         self.patient_name = patient_name
         self.reward_fun = reward_fun
         self.np_random, _ = seeding.np_random(seed=seed)
-        self.actions = [0.001, 0.005, 0.01, 0.1, 0.2, 0.5, 0.8, 1.0]
+        self.actions = [0, 0.03, 0.06, 0.3, 0.6, 1]
+        # self.actions = [0, 0.001, 0.01, 0.025, 0.05, 0.075, 0.1, 0.2, 0.5, 1.0, 2, 2.5, 5]
+        # self.actions = [0, 0.002, 0.004, 0.006, 0.008, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055,
+        #                 0.06, 0.065, 0.7, 0.075, 0.08, 0.09, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 5]
         self.env, _, _, _ = self._create_env_from_random_state()
 
     def step(self, action):
@@ -722,6 +731,8 @@ class T1DDiscreteEnv(gym.Env):
     def action_space(self):
 
         return spaces.Discrete(6)
+        # return spaces.Discrete(13)
+        # return spaces.Discrete(30)
 
     @property
     def observation_space(self):

@@ -1,3 +1,8 @@
+"""
+Changes that have been made:
+- our implementation
+"""
+
 import os
 from datetime import datetime, timedelta
 
@@ -117,10 +122,11 @@ def create_ctrllers(_ctrllers):
 
 if __name__ == '__main__':
     path = create_result_folder()
-    latest_saved_model = './models/best_model_T1DDiscreteSimEnv.zip'
+    latest_saved_model = './models/best_model_T1DChildSimEnv.zip'
 
     # select controller to run simulation with
-    controllers = [BBController(), PIDController(P=-0.0001, I=-0.000000275, D=-0.1), PPOController(0, latest_saved_model)]
+    controllers = [BBController(), PIDController(P=-0.0001, I=-0.000000275, D=-0.1),
+                   PPOController(0, latest_saved_model)]
     # controllers = [PPOController(0, latest_saved_model)]
 
     # Select parameters to run simulation for
@@ -162,4 +168,4 @@ if __name__ == '__main__':
             results = batch_sim(sim_instances, parallel=True)
 
         df = pd.concat(results, keys=[s.env.patient.name for s in sim_instances])
-        results, ri_per_hour, figs, axes = report(df, path_ctrl)
+        results, ri_per_hour, figs, axes = report(df, path_ctrl, sim_days=sim_days)
