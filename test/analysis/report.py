@@ -5,7 +5,7 @@ Changes that have been made:
 - added "ensemble_insulin_24h": ensemble of insulin of all patients for plot (24h)
 - added "ensemble_insulin": ensemble of insulin of all patients for plot (24h)
 - added "ensemble_CHO_24h": ensemble of CHO of all patients for plot (24h)
-- changes "ensemblePlot": CGM removed and insulin added as subplot
+- changes "ensemblePlot":  insulin added as subplot
 - changes "percent_stats": time in range changed to BG ranges (xx<BG<xx)
 """
 
@@ -229,14 +229,14 @@ def ensemble_CHO_24h(CHO, sim_days, ax=None, plot_var=False, nstd=3):
     return ax
 
 def ensemblePlot(df):
-    df_BG = df.unstack(level=0).BG
+    df_CGM = df.unstack(level=0).CGM
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
     fig = plt.figure(figsize=(8, 6), dpi=600, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
-    ax1 = ensemble_BG(df_BG, ax=ax1, plot_var=True, nstd=1)
+    ax1 = ensemble_BG(df_CGM, ax=ax1, plot_var=True, nstd=1)
     ax2 = ensemble_insulin(df_insulin, ax=ax2, plot_var=True, nstd=1)
     # t = df_CHO.index.to_pydatetime()
     t = pd.to_datetime(df_CHO.index)
@@ -257,14 +257,14 @@ def ensemblePlot(df):
 
 
 def ensemblePlot_24h(df, sim_days):
-    df_BG = df.unstack(level=0).BG
+    df_CGM = df.unstack(level=0).CGM
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
     fig = plt.figure(figsize=(8, 6), dpi=600, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
-    ax1 = ensemble_BG_24h(df_BG, sim_days=sim_days, ax=ax1, plot_var=True, nstd=1)
+    ax1 = ensemble_BG_24h(df_CGM, sim_days=sim_days, ax=ax1, plot_var=True, nstd=1)
     ax2 = ensemble_insulin_24h(df_insulin, sim_days=sim_days, ax=ax2, plot_var=True, nstd=1)
     ax3 = ensemble_CHO_24h(df_CHO, sim_days=sim_days, ax=ax3, plot_var=True, nstd=1)
     # t = df_CHO.index.to_pydatetime()
@@ -285,8 +285,9 @@ def ensemblePlot_24h(df, sim_days):
 
 
 def percent_stats(BG, ax=None):
+    fig = plt.figure(figsize=(8, 6), layout='constrained')  # figure size and image quality
     if ax is None:
-        fig, ax = plt.subplots(1)
+        ax = fig.add_subplot(111)
     # exclude BG > 50
     p_hyper = ((BG > 180) & (BG < 250)).sum() / len(BG) * 100
     p_hyper.name = '250<BG>180'
@@ -303,8 +304,8 @@ def percent_stats(BG, ax=None):
     # p_stats.plot(ax=ax, kind='bar')
     p_stats.plot.bar(ax=ax, stacked=True)
     ax.set_ylabel('Percent of time in Range (%)')
-    fig.tight_layout()
     #     p_stats.transpose().plot(kind='bar', legend=False)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     return p_stats, fig, ax
 
 
@@ -341,11 +342,12 @@ def risk_index_trace(df_BG, visualize=False):
             plt.ylabel('Risk Index')
 
     ri_mean = ri_per_hour.transpose().mean().unstack(level=0)
-    fig, ax = plt.subplots(1)
+    fig = plt.figure(figsize=(8, 6), layout='constrained')  # figure size and image quality
+    ax = fig.add_subplot(111)
     ri_mean.plot(ax=ax, kind='bar')
-    fig.tight_layout()
 
     axes.append(ax)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     return ri_per_hour, ri_mean, fig, axes
 
 
@@ -455,7 +457,7 @@ def CVGA(BG_list, label=None):
 
     zone_stats = pd.DataFrame(zone_stats, columns=['A', 'B', 'C', 'D', 'E'])
     #     ax.legend(bbox_to_anchor=(1, 1.10), borderaxespad=0.5)
-    ax.legend()
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
     return zone_stats, fig, ax
 
 
@@ -507,13 +509,13 @@ if __name__ == '__main__':
     # logger.addHandler(fh)
     logger.addHandler(ch)
     # For test only
-    path = os.path.join('..', 'results', '2022-12-17_10-13-30', 'BBController')
+    path = os.path.join('..', 'results', '2022-12-17_14-58-23', 'BBController')
     os.chdir(path)
     filename = glob.glob('*#*.csv')
     name = [_f[:-4] for _f in filename]
     df = pd.concat([pd.read_csv(f, index_col=0) for f in filename], keys=name)
-    # sim_days = 1
-    sim_days = int(len(df) / len(filename) / 480) # overlays multiple days on one day
+    sim_days = 1
+    # sim_days = int(len(df) / len(filename) / 480) # overlays multiple days on one day
     if df['insulin'].dtypes == 'object':
         df['insulin'] = df['insulin'].str.replace(r'[\[\]]', '', regex=True).astype(float)
     results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController', sim_days=sim_days)
