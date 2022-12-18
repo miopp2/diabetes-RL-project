@@ -9,8 +9,8 @@ folder_to_analyse = "2022-12-17_10-13-30"
 prop_cycle = plt.rcParams['axes.prop_cycle']
 colors = prop_cycle.by_key()['color']
 
-# groups = ["/adolescent*.csv", "/adult*.csv", "/child*.csv"]
-groups = ["/adolescent*.csv"]
+groups = ["/adolescent*.csv", "/adult*.csv", "/child*.csv", "/*#*.csv"]
+# groups = ["/adolescent*.csv"]
 part_path = "./results/" + folder_to_analyse
 
 paths_all = [os.path.join(part_path, controller) for controller in os.listdir(part_path)]
