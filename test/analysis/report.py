@@ -47,7 +47,7 @@ def ensemble_BG_24h(BG, sim_days, ax=None, plot_var=False, nstd=3):
             t, up_env, down_env, alpha=0.5, label='+/- {0}*std'.format(nstd))
     for p in dailyBG:
         ax.plot_date(
-            t, dailyBG[p], '-', color='grey', alpha=0.5, lw=0.5, label='_nolegend_')
+            t, dailyBG[p], '-', color='grey', alpha=0.5, lw=0.1, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
     ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
@@ -193,7 +193,7 @@ def ensemblePlot(df):
     df_BG = df.unstack(level=0).BG
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(figsize=(8, 6), dpi=180, layout='constrained')  # figure size and image quality
+    fig = plt.figure(figsize=(8, 6), dpi=300, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
@@ -220,7 +220,7 @@ def ensemblePlot_24h(df, sim_days):
     df_BG = df.unstack(level=0).BG
     df_insulin = df.unstack(level=0).insulin
     df_CHO = df.unstack(level=0).CHO
-    fig = plt.figure(figsize=(8, 6), dpi=180, layout='constrained')  # figure size and image quality
+    fig = plt.figure(figsize=(8, 6), dpi=300, layout='constrained')  # figure size and image quality
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
@@ -467,15 +467,16 @@ if __name__ == '__main__':
     logger.addHandler(ch)
     # For test only
     path = os.path.join('..', 'results', 'test',
-                        '2022-12-16_14-51-12', 'BBController')
+                        '2022-12-16_14-51-12', 'PPOController')
     os.chdir(path)
     filename = glob.glob('*#*.csv')
     name = [_f[:-4] for _f in filename]
     df = pd.concat([pd.read_csv(f, index_col=0) for f in filename], keys=name)
-    # df_BG = df.unstack(level=0).BG
-    # df_CGM = df.unstack(level=0).CGM
-    # report(df_BG, df_CGM)
-    results, ri_per_hour, zone_stats, axes = report(df, '..\\BBController')
+    if df['insulin'].dtypes == 'object':
+        df['insulin'] = df['insulin'].str.replace(r'[\[\]]', '', regex=True).astype(float)
+    sim_days = 1
+    #sim_days = int(len(df) / len(filename) / 480) # overlays multiple days on one day
+    results, ri_per_hour, zone_stats, axes = report(df, '..\\PPOController', sim_days=sim_days)
     # print results
-    # # print ri_per_hour
+    # print ri_per_hour
     # print zone_stats
