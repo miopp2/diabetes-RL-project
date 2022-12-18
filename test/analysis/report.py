@@ -8,7 +8,6 @@ Changes that have been made:
 - changes "percent_stats": time in range changed to BG ranges (xx<BG<xx)
 """
 
-
 import glob
 import pandas as pd
 import numpy as np
@@ -19,6 +18,7 @@ from datetime import timedelta
 from matplotlib.collections import PatchCollection
 # from pandas.plotting import lag_plot
 import logging
+plt.rcParams.update({'figure.max_open_warning': 0})
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ def ensemble_BG(BG, ax=None, plot_var=False, nstd=3):
         ax.plot_date(
             t, BG[p], '-', color='grey', alpha=0.5, lw=0.5, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
-    #ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
+    # ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
@@ -100,7 +100,6 @@ def ensemble_BG(BG, ax=None, plot_var=False, nstd=3):
     hours_day = 24
     for day in range(sim_days):
         ax.axvline([start_time + timedelta(hours=day * hours_day)], c='grey', linestyle='--', lw=1)
-
 
     ax.set_xlim([t[0], t[-1]])
     ax.set_ylim([BG.min().min() - 10, BG.max().max() + 10])
@@ -142,9 +141,9 @@ def ensemble_insulin_24h(Insulin, sim_days, ax=None, plot_var=False, nstd=3):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
 
     ax.set_xlim([t[0], t[-1]])
-    ax.set_ylim([dailyInsulin.min().min() - 0.5, dailyInsulin.max().max() + 0.5])
+    ax.set_ylim([dailyInsulin.min().min() - 0.1, dailyInsulin.max().max() + 0.1])
     ax.legend()
-    ax.set_ylabel('Insulin (xxxxxxxxx)') #todo
+    ax.set_ylabel('Insulin (U/min)')
     #     fig.autofmt_xdate()
     return ax
 
@@ -171,7 +170,7 @@ def ensemble_insulin(insulin, ax=None, plot_var=False, nstd=3):
         ax.plot_date(
             t, insulin[p], '-', color='grey', alpha=0.5, lw=0.5, label='_nolegend_')
     ax.plot(t, mean_curve, lw=2, label='Mean Curve')
-    #ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
+    # ax.xaxis.set_minor_locator(mdates.HourLocator(interval=3))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M\n'))
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
@@ -182,11 +181,10 @@ def ensemble_insulin(insulin, ax=None, plot_var=False, nstd=3):
     for day in range(sim_days):
         ax.axvline([start_time + timedelta(hours=day * hours_day)], c='grey', linestyle='--', lw=1)
 
-
     ax.set_xlim([t[0], t[-1]])
-    ax.set_ylim([insulin.min().min() - 0.5, insulin.max().max() + 0.5])
+    ax.set_ylim([insulin.min().min() - 0.1, insulin.max().max() + 0.1])
     ax.legend()
-    ax.set_ylabel('Insulin (xxxxxxxxx)') #todo
+    ax.set_ylabel('Insulin (U/min)')
     #     fig.autofmt_xdate()
     return ax
 
@@ -213,7 +211,7 @@ def ensemblePlot(df):
     ax3.xaxis.set_major_formatter(mdates.DateFormatter('\n%b %d'))
     ax3.set_xlim([t[0], t[-1]])
     ax1.set_ylabel('Blood Glucose (mg/dl)')
-    ax2.set_ylabel('Insulin (xxxxxxxxx)') #todo
+    ax2.set_ylabel('Insulin (U/min)')
     ax3.set_ylabel('CHO (g)')
     return fig, ax1, ax2, ax3
 
@@ -240,7 +238,7 @@ def ensemblePlot_24h(df, sim_days):
     ax3.xaxis.set_major_formatter(mdates.DateFormatter(''))
     ax3.set_xlim([t[0], t[480]])
     ax1.set_ylabel('Blood Glucose (mg/dl)')
-    ax2.set_ylabel('Insulin (xxxxxxxxx)') #todo
+    ax2.set_ylabel('Insulin (U/min)')
     ax3.set_ylabel('CHO (g)')
     return fig, ax1, ax2, ax3
 

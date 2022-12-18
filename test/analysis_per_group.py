@@ -3,10 +3,10 @@ import glob
 import pandas as pd
 from test.analysis.report import report
 
-folder_to_analyse = "2022-12-13_10-19-35"
+folder_to_analyse = "2022-12-08_08-55-17"
 
-# groups = ["/adolescent*.csv", "/adult*.csv", "child*.csv"]
-groups = ["/child*.csv"]
+# groups = ["/adolescent*.csv", "/adult*.csv", "/child*.csv"]
+groups = ["/adolescent*.csv"]
 part_path = "./results/" + folder_to_analyse
 
 paths_all = [os.path.join(part_path, controller) for controller in os.listdir(part_path)]
@@ -22,4 +22,6 @@ for i, group in enumerate(group_paths):
     results = [pd.read_csv(file, index_col='Time') for file in files]
     df = pd.concat(results, keys=patient_names)
     sim_days = int(len(df) / len(files) / 480)
+    if df['insulin'].dtypes == 'object':
+        df['insulin'] = df['insulin'].str.replace(r'[\[\]]', '', regex=True).astype(float)
     results, ri_per_hour, figs, axes = report(df, path_ctrl, sim_days=sim_days)
