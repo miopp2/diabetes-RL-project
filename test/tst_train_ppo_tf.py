@@ -4,7 +4,7 @@ Changes that have been made:
 - Remove unused imports and variables
 """
 from simglucose.simulation.env import risk_diff as orig_risk_diff
-from stable_baselines import PPO2
+from stable_baselines import PPO2, DDPG
 from stable_baselines.common import make_vec_env
 from stable_baselines.common.vec_env import SubprocVecEnv
 

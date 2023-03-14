@@ -10,7 +10,6 @@ from warnings import simplefilter
 simplefilter(action='ignore', category=FutureWarning)
 simplefilter(action='ignore', category=UserWarning)
 
-from simglucose.simulation.env import risk_diff as orig_risk_diff
 from stable_baselines import PPO2
 from stable_baselines.common import make_vec_env
 from stable_baselines.common.callbacks import CheckpointCallback
@@ -29,7 +28,7 @@ def main():
                                              name_prefix="rl_model", verbose=1)
     checkpoint_callback1 = SaveOnBestTrainingRewardCallback(check_freq=128, log_dir='./' + save_folder, verbose=1)
     env_class = T1DDiscreteSimEnv
-    reward_func = orig_risk_diff
+    reward_func = risk_diff
     vec_env_kwargs = {'start_method': 'spawn'}
     env_kwargs = {'reward_fun': reward_func}
     n_envs = 32
